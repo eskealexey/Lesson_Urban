@@ -18,4 +18,4 @@ def factor(n):
         return n
     return factor(n - 1) * n
 
-print(factor(10))
+print(factor(5))

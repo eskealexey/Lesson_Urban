@@ -10,16 +10,16 @@
 class Car:
     price = 1000000
     def horse_powers(self):
-        print('300 л.с.')
+        return '300 л.с.'
 
 class Nissan(Car):
     price = 500000
     def horse_powers(self):
-        print('220 л.с.')
+        return '220 л.с.'
 
 class Kia(Car):
     def __init__(self, price=900000):
         self.price = price
 
     def horse_powers(self):
-        print('170 л.с.')
+        return '170 л.с.'

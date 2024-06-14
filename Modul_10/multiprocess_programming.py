@@ -1,10 +1,9 @@
-from multiprocessing import Process, Lock
-
+from multiprocessing import Process, Lock, Manager
 
 class WarehouseManager:
-    def __init__(self, *args, **kwargs):
-        self.lock = Lock()
-        self.data = {}
+    def __init__(self, shared_data, lock):
+        self.lock = lock
+        self.data = shared_data
 
     def process_request(self, request: tuple):
         product, action, quantity = request
@@ -19,18 +18,17 @@ class WarehouseManager:
                     self.data[product] -= quantity
 
     def run(self, requests):
-        mang_list = []
-        for i in requests:
-            self.manag = Process(target=self.process_request, args=(i,))
-            mang_list.append(self.manag)
-            self.manag.start()
-        for i in requests:
-            self.manag.join()
+        processes = []
+        for request in requests:
+            p = Process(target=self.process_request, args=(request,))
+            processes.append(p)
+            p.start()
+        for p in processes:
+            p.join()
 
 if __name__ == "__main__":
-    manager = WarehouseManager()
-    shared_data = manager.dict()  # Создаем общий словарь
-    lock = Lock()
+    manager = Manager()
+    shared_data = manager.dict()
 
     requests = [
         ("product1", "receipt", 100),
@@ -39,8 +37,9 @@ if __name__ == "__main__":
         ("product3", "receipt", 200),
         ("product2", "shipment", 50)
     ]
+    with manager:
+        lock = manager.Lock()
+        warehouse_manager = WarehouseManager(shared_data, lock)
+        warehouse_manager.run(requests)
 
-    warehouse_manager = WarehouseManager(shared_data, lock)
-    warehouse_manager.run(requests)
-
-    print(shared_data)
+        print(shared_data)

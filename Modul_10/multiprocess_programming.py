@@ -27,8 +27,7 @@ class WarehouseManager:
             p.join()
 
 if __name__ == "__main__":
-    manager = Manager()
-    shared_data = manager.dict()
+    # manager = Manager()
 
     requests = [
         ("product1", "receipt", 100),
@@ -37,8 +36,9 @@ if __name__ == "__main__":
         ("product3", "receipt", 200),
         ("product2", "shipment", 50)
     ]
-    with manager:
-        lock = manager.Lock()
+    with Manager() as manager:
+        shared_data = manager.dict()
+        lock = Lock()
         warehouse_manager = WarehouseManager(shared_data, lock)
         warehouse_manager.run(requests)
 

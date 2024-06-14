@@ -1,5 +1,6 @@
 from multiprocessing import Process, Lock, Manager
 
+
 class WarehouseManager:
     def __init__(self, shared_data, lock):
         self.lock = lock
@@ -26,9 +27,8 @@ class WarehouseManager:
         for p in processes:
             p.join()
 
-if __name__ == "__main__":
-    # manager = Manager()
 
+if __name__ == "__main__":
     requests = [
         ("product1", "receipt", 100),
         ("product2", "receipt", 150),

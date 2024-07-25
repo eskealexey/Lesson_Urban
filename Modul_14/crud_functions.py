@@ -6,7 +6,7 @@ cursor = connection.cursor()
 cursor.execute(
     '''
     CREATE TABLE IF NOT EXISTS Products(
-    id INTEGER PRIMERY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
     description TEXT,
     price INTEGER NOT NULL
@@ -15,8 +15,8 @@ cursor.execute(
 
 
 # for a in range(1, 5):
-#     cursor.execute('INSERT INTO Products(id, title, description, price) VALUES (?, ?, ?, ?)',
-#                    (a, f'Продукт {a}', f'Описание {a}', f'{a * 100}'))
+#     cursor.execute('INSERT INTO Products(title, description, price) VALUES (?, ?, ?)',
+#                    (f'Продукт {a}', f'Описание {a}', f'{a * 100}'))
 # connection.commit()
 def get_all_products():
     cursor.execute('SELECT * FROM Products;')
@@ -24,6 +24,33 @@ def get_all_products():
     connection.commit()
     return result
 
-# pruds = get_all_products()
-# for prod in pruds:
-#     print(prod)
+
+def initiate_db():
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS Users(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    email TEXT,
+    age INTEGER,
+    balance INTEGER DEFAULT 1000
+)
+    ''')
+    connection.commit()
+
+
+def is_included(username):
+    cursor.execute('SELECT COUNT(username) FROM Users WHERE username = ?', (username,))
+    count = cursor.fetchone()
+    if count[0] > 0:
+        return True
+    else:
+        return False
+
+
+def add_user(username, email, age):
+    if not is_included(username):
+        cursor.execute('INSERT INTO Users (username, email, age) VALUES (?, ?, ?)', (username, email, age))
+        connection.commit()
+
+
+initiate_db()

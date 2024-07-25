@@ -16,9 +16,12 @@ kb = ReplyKeyboardMarkup(resize_keyboard=True)
 batton1 = KeyboardButton(text='Рассчитать')
 batton2 = KeyboardButton(text='Информация')
 batton3 = KeyboardButton(text='Купить')
+batton4 = KeyboardButton(text='Регистрация')
 kb.add(batton1)
 kb.insert(batton2)
+kb.insert(batton4)
 kb.add(batton3)
+
 
 kbi = InlineKeyboardMarkup()
 batton_in1 = InlineKeyboardButton(text='Рассчитать норму калорий', callback_data='calories')
@@ -44,6 +47,13 @@ class UserState(StatesGroup):
     weight = State()
 
 
+class RegistrationState(StatesGroup):
+    username = State()
+    email = State()
+    age = State()
+    balance = State()
+
+
 def calorie_calculator(age, growth, weigth):
     return 10.0 * float(weigth) + 6.25 * float(growth) - 5.0 * int(age) + 5.0
 
@@ -64,13 +74,6 @@ async def main_menu(message: types.Message):
     await message.answer(text='Выберете меню', reply_markup=kbi)
 
 
-# @dp.message_handler(text='Купить')
-# async def get_buying_list(message):
-#     for x in range(1, 5):
-#         await message.answer(text=f"Название: Product{x} | Описание: описание {x} | Цена: {x * 100}")
-#         with open(f'img/{x}.jpg', 'rb') as img:
-#             await message.answer_photo(img)
-#     await message.answer(text='Выберите продукт для покупки:', reply_markup=kb_bay)
 @dp.message_handler(text='Купить')
 async def get_buying_list(message):
     prods = crud_functions.get_all_products()
@@ -122,6 +125,40 @@ async def send_calories(message, state):
     result = calorie_calculator(data['age'], data['growth'], data['weight'])
     await message.answer(text=f'Ваша норма калорий {result}')
     await state.finish()
+
+
+@dp.message_handler(text='Регистрация')
+async def sing_up(message):
+    await message.answer("Введите имя пользователя (только латинский алфавит):")
+    await RegistrationState.username.set()
+
+
+@dp.message_handler(state=RegistrationState.username)
+async def set_username(message, state):
+    if crud_functions.is_included(message.text):
+        await message.answer('Пользователь существует, введите другое имя')
+        await RegistrationState.username.set()
+    else:
+        await state.update_data(username=message.text)
+        await message.answer(text='Введите свой email:')
+        await RegistrationState.email.set()
+
+
+@dp.message_handler(state=RegistrationState.email)
+async def set_email(message, state):
+    await state.update_data(email=message.text)
+    await message.answer(text='Введите свой возраст:')
+    await RegistrationState.age.set()
+
+
+@dp.message_handler(state=RegistrationState.age)
+async def set_age(message, state):
+    await state.update_data(age=message.text)
+    data = await state.get_data()
+    crud_functions.add_user(data['username'], data["email"], data["age"])
+    await message.answer(text='Регистрация прошла успешно!')
+    await state.finish()
+
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)

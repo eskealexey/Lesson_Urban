@@ -1,4 +1,4 @@
-class House():
+class House:
 
     def __init__(self, name: str, number_of_floors: int):
         self.name =name

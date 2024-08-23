@@ -1,0 +1,3 @@
+Potato, 50.5, Vegetables
+Spagetti, 3.4, Groceries
+Potato, 5.5, Vegetables
